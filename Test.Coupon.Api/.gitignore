@@ -1,0 +1,52 @@
+# Build Folders
+bin/
+obj/
+
+# User-specific files
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# DotCover
+.idea/
+*.dotCover
+
+# Logs
+*.log
+
+# ASP.NET generated files
+wwwroot/lib/
+wwwroot/dist/
+
+# VS Code
+.vscode/
+
+# Rider
+.idea/
+
+# Docker
+**/docker-compose.override.yml
+**/docker-compose.vs.debug.yml
+**/docker-compose.vs.release.yml
+
+# Aspire specific
+**/Components/_generated/
+**/obj/DotNetToolReferences/
+
+# Orchestration artifacts
+.orchestration/
+.env
+
+# Secrets
+secrets/
+*.secrets.json
+
+# Publish output
+**/publish/
+
+# Visual Studio temporary files
+.vs/
