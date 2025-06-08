@@ -1,43 +1,65 @@
-using Test.Coupon.Api.Web;
-using Test.Coupon.Api.Web.Components;
+﻿using Microsoft.EntityFrameworkCore;
+using SimulationProjectEShop.Catalog.API.Infrastructure;
+using Test.Coupon.Api.Web.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add service defaults & Aspire client integrations.
 builder.AddServiceDefaults();
+
+// Redis cache
 builder.AddRedisOutputCache("cache");
 
-// Add services to the container.
+// Swagger
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// Razor Components
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddHttpClient<WeatherApiClient>(client =>
+// DbContext + Seed Data
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString("CouponDemo"));
+});
+builder.Services.AddMigration<ApplicationDbContext, ApplicationDbContextSeed>();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
     {
-        // This URL uses "https+http://" to indicate HTTPS is preferred over HTTP.
-        // Learn more about service discovery scheme resolution at https://aka.ms/dotnet/sdschemes.
-        client.BaseAddress = new("https+http://apiservice");
+        policy.WithOrigins("http://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
     });
-
+});
 var app = builder.Build();
+app.UseCors("AllowFrontend");
 
+// Middleware và môi trường
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 
-app.UseAntiforgery();
+// Swagger UI
+app.UseSwagger();
+app.UseSwaggerUI();
 
+// Antiforgery + Cache
+app.UseAntiforgery();
 app.UseOutputCache();
 
+// Static files + Razor + Controller
 app.MapStaticAssets();
+//app.MapRazorComponents<App>()
+//    .AddInteractiveServerRenderMode();
 
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
-
+app.MapControllers();
 app.MapDefaultEndpoints();
 
 app.Run();
